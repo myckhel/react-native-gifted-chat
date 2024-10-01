@@ -16,7 +16,6 @@ import { IMessage } from './Models'
 import { StylePropType } from './utils'
 
 const styles = StyleSheet.create({
-  container: {},
   image: {
     width: 150,
     height: 100,
@@ -31,7 +30,7 @@ const styles = StyleSheet.create({
 })
 
 export interface MessageImageProps<TMessage extends IMessage> {
-  currentMessage?: TMessage
+  currentMessage: TMessage
   containerStyle?: StyleProp<ViewStyle>
   imageSourceProps?: Partial<ImageURISource>
   imageStyle?: StyleProp<ImageStyle>
@@ -39,20 +38,20 @@ export interface MessageImageProps<TMessage extends IMessage> {
   lightboxProps?: LightboxProps
 }
 
-export function MessageImage<TMessage extends IMessage = IMessage>({
+export function MessageImage<TMessage extends IMessage = IMessage> ({
   containerStyle,
-  lightboxProps = {},
-  imageProps = {},
-  imageSourceProps = {},
+  lightboxProps,
+  imageProps,
+  imageSourceProps,
   imageStyle,
   currentMessage,
 }: MessageImageProps<TMessage>) {
-  if (currentMessage == null) {
+  if (currentMessage == null)
     return null
-  }
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={containerStyle}>
+      {/* @ts-expect-error: Lightbox types are not fully compatible */}
       <Lightbox
         activeProps={{
           style: styles.imageActive,

@@ -1,5 +1,5 @@
+import React, { useState, useMemo, useCallback } from 'react'
 import PropTypes from 'prop-types'
-import React, { useState, useMemo } from 'react'
 import {
   Text,
   StyleSheet,
@@ -9,7 +9,6 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native'
-import { useCallbackOne } from 'use-memo-one'
 import { IMessage, Reply } from './Models'
 import Color from './Color'
 import { StylePropType } from './utils'
@@ -47,7 +46,7 @@ const styles = StyleSheet.create({
 
 export interface QuickRepliesProps<TMessage extends IMessage = IMessage> {
   nextMessage?: TMessage
-  currentMessage?: TMessage
+  currentMessage: TMessage
   color?: string
   sendText?: string
   quickReplyStyle?: StyleProp<ViewStyle>
@@ -63,7 +62,7 @@ const sameReply = (currentReply: Reply) => (reply: Reply) =>
 const diffReply = (currentReply: Reply) => (reply: Reply) =>
   currentReply.value !== reply.value
 
-export function QuickReplies({
+export function QuickReplies ({
   currentMessage,
   nextMessage,
   color = Color.peterRiver,
@@ -82,18 +81,16 @@ export function QuickReplies({
     const hasNext = !!nextMessage && !!nextMessage!._id
     const keepIt = currentMessage!.quickReplies!.keepIt
 
-    if (hasReplies && !hasNext) {
+    if (hasReplies && !hasNext)
       return true
-    }
 
-    if (hasReplies && hasNext && keepIt) {
+    if (hasReplies && hasNext && keepIt)
       return true
-    }
 
     return false
   }, [currentMessage, nextMessage])
 
-  const handlePress = useCallbackOne(
+  const handlePress = useCallback(
     (reply: Reply) => () => {
       if (currentMessage) {
         const { type } = currentMessage.quickReplies!
@@ -103,21 +100,20 @@ export function QuickReplies({
             return
           }
           case 'checkbox': {
-            if (replies.find(sameReply(reply))) {
+            if (replies.find(sameReply(reply)))
               setReplies(replies.filter(diffReply(reply)))
-            } else {
+            else
               setReplies([...replies, reply])
-            }
+
             return
           }
           default: {
             warning(`onQuickReply unknown type: ${type}`)
-            return
           }
         }
       }
     },
-    [replies, currentMessage],
+    [replies, currentMessage]
   )
 
   const handleSend = (repliesData: Reply[]) => () => {
@@ -125,19 +121,19 @@ export function QuickReplies({
       repliesData.map((reply: Reply) => ({
         ...reply,
         messageId: currentMessage!._id,
-      })),
+      }))
     )
   }
 
-  if (!shouldComponentDisplay) {
+  if (!shouldComponentDisplay)
     return null
-  }
 
   return (
     <View style={[styles.container, quickReplyContainerStyle]}>
       {currentMessage!.quickReplies!.values.map(
         (reply: Reply, index: number) => {
-          const selected = type === 'checkbox' && replies.find(sameReply(reply))
+          const selected =
+            type === 'checkbox' && replies.find(sameReply(reply))
 
           return (
             <TouchableOpacity
@@ -152,7 +148,7 @@ export function QuickReplies({
             >
               <Text
                 numberOfLines={10}
-                ellipsizeMode={'tail'}
+                ellipsizeMode='tail'
                 style={[
                   styles.quickReplyText,
                   { color: selected ? Color.white : color },
@@ -163,7 +159,7 @@ export function QuickReplies({
               </Text>
             </TouchableOpacity>
           )
-        },
+        }
       )}
       {replies.length > 0 && (
         <TouchableOpacity

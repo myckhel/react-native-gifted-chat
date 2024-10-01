@@ -1,6 +1,6 @@
-import { MaterialIcons } from '@expo/vector-icons'
 import React, { useCallback, useReducer } from 'react'
 import { Alert, Linking, Platform, StyleSheet, Text, View } from 'react-native'
+import { MaterialIcons } from '@expo/vector-icons'
 import {
   GiftedChat,
   IMessage,
@@ -8,24 +8,25 @@ import {
   SendProps,
   SystemMessage,
 } from 'react-native-gifted-chat'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { NavBar } from './components/navbar'
 import AccessoryBar from './example-expo/AccessoryBar'
 import CustomActions from './example-expo/CustomActions'
 import CustomView from './example-expo/CustomView'
 import earlierMessages from './example-expo/data/earlierMessages'
 import messagesData from './example-expo/data/messages'
+import * as Clipboard from 'expo-clipboard'
 
 const user = {
   _id: 1,
   name: 'Developer',
 }
 
-const otherUser = {
-  _id: 2,
-  name: 'React Native',
-  avatar: 'https://facebook.github.io/react/img/logo_og.png',
-}
+// const otherUser = {
+//   _id: 2,
+//   name: 'React Native',
+//   avatar: 'https://facebook.github.io/react/img/logo_og.png',
+// }
 
 interface IState {
   messages: any[]
@@ -49,7 +50,7 @@ interface StateAction {
   payload?: any
 }
 
-function reducer(state: IState, action: StateAction) {
+function reducer (state: IState, action: StateAction) {
   switch (action.type) {
     case ActionKind.SEND_MESSAGE: {
       return {
@@ -96,29 +97,28 @@ const App = () => {
       const newMessages = GiftedChat.append(
         state.messages,
         sentMessages,
-        Platform.OS !== 'web',
+        Platform.OS !== 'web'
       )
 
       dispatch({ type: ActionKind.SEND_MESSAGE, payload: newMessages })
     },
-    [dispatch, state.messages],
+    [dispatch, state.messages]
   )
 
   const onLoadEarlier = useCallback(() => {
-    console.log('loading')
     dispatch({ type: ActionKind.LOAD_EARLIER_START })
     setTimeout(() => {
       const newMessages = GiftedChat.prepend(
         state.messages,
         earlierMessages() as IMessage[],
-        Platform.OS !== 'web',
+        Platform.OS !== 'web'
       )
 
       dispatch({ type: ActionKind.LOAD_EARLIER_MESSAGES, payload: newMessages })
     }, 1500) // simulating network
   }, [dispatch, state.messages])
 
-  const parsePatterns = useCallback((_linkStyle: any) => {
+  const parsePatterns = useCallback(() => {
     return [
       {
         pattern: /#(\w+)/,
@@ -136,9 +136,38 @@ const App = () => {
     Alert.alert('On avatar press')
   }, [])
 
+  const handleLongPress = useCallback((context: unknown, currentMessage: object) => {
+    if (!currentMessage.text)
+      return
+
+    const options = [
+      'Copy text',
+      'Cancel',
+    ]
+
+    const cancelButtonIndex = options.length - 1
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(context as any).actionSheet().showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+      },
+      (buttonIndex: number) => {
+        switch (buttonIndex) {
+          case 0:
+            Clipboard.setStringAsync(currentMessage.text)
+            break
+          default:
+            break
+        }
+      }
+    )
+  }, [])
+
   const onQuickReply = useCallback((replies: any[]) => {
     const createdAt = new Date()
-    if (replies.length === 1) {
+    if (replies.length === 1)
       onSend([
         {
           createdAt,
@@ -147,7 +176,7 @@ const App = () => {
           user,
         },
       ])
-    } else if (replies.length > 1) {
+    else if (replies.length > 1)
       onSend([
         {
           createdAt,
@@ -156,9 +185,8 @@ const App = () => {
           user,
         },
       ])
-    } else {
+    else
       console.warn('replies param is not set correctly')
-    }
   }, [])
 
   const renderQuickReplySend = useCallback(() => {
@@ -169,7 +197,7 @@ const App = () => {
     (isTyping: boolean) => {
       dispatch({ type: ActionKind.SET_IS_TYPING, payload: isTyping })
     },
-    [dispatch],
+    [dispatch]
   )
 
   const onSendFromUser = useCallback(
@@ -184,24 +212,26 @@ const App = () => {
 
       onSend(messagesToUpload)
     },
-    [onSend],
+    [onSend]
   )
 
   const renderAccessory = useCallback(() => {
     return (
       <AccessoryBar
         onSend={onSendFromUser}
-        isTyping={() => setIsTyping(true)}
+        isTyping={() => setIsTyping(!state.isTyping)}
       />
     )
-  }, [onSendFromUser, setIsTyping])
+  }, [onSendFromUser, setIsTyping, state.isTyping])
 
   const renderCustomActions = useCallback(
     props =>
-      Platform.OS === 'web' ? null : (
-        <CustomActions {...props} onSend={onSendFromUser} />
-      ),
-    [onSendFromUser],
+      Platform.OS === 'web'
+        ? null
+        : (
+          <CustomActions {...props} onSend={onSendFromUser} />
+        ),
+    [onSendFromUser]
   )
 
   const renderSystemMessage = useCallback(props => {
@@ -224,16 +254,16 @@ const App = () => {
 
   const renderSend = useCallback((props: SendProps<IMessage>) => {
     return (
-      <Send {...props} containerStyle={{ justifyContent: 'center' }}>
+      <Send {...props} containerStyle={{ justifyContent: 'center', paddingHorizontal: 10 }}>
         <MaterialIcons size={30} color={'tomato'} name={'send'} />
       </Send>
     )
   }, [])
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.fill, styles.container]}>
       <NavBar />
-      <View style={styles.content}>
+      <View style={[styles.fill, styles.content]}>
         <GiftedChat
           messages={state.messages}
           onSend={onSend}
@@ -243,8 +273,9 @@ const App = () => {
           parsePatterns={parsePatterns}
           user={user}
           scrollToBottom
-          onLongPressAvatar={onLongPressAvatar}
           onPressAvatar={onPressAvatar}
+          onLongPressAvatar={onLongPressAvatar}
+          onLongPress={handleLongPress}
           onQuickReply={onQuickReply}
           quickReplyStyle={{ borderRadius: 2 }}
           quickReplyTextStyle={{
@@ -270,9 +301,24 @@ const App = () => {
   )
 }
 
+const AppWrapper = () => {
+  return (
+    <SafeAreaProvider>
+      <App />
+    </SafeAreaProvider>
+  )
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  content: { backgroundColor: '#ffffff', flex: 1 },
+  fill: {
+    flex: 1,
+  },
+  container: {
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    backgroundColor: '#ffffff',
+  },
 })
 
-export default App
+export default AppWrapper

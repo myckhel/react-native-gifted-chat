@@ -12,3 +12,18 @@ web-build/
 
 # macOS
 .DS_Store
+
+ios/.xcode.env.local
+*.hprof
+.cxx/
+
+/vendor/bundle/
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+yarn-error.log

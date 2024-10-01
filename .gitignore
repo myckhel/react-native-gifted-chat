@@ -3,7 +3,6 @@ node_modules/
 .expo/
 npm-debug.log
 TODO.md
-yarn-error.log
 .idea
 .vscode
 Exponent-*.app
@@ -11,3 +10,18 @@ Exponent-*.app
 lib/
 coverage/
 web-build/
+.eslintcache
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+yarn-error.log
+
+example_bare/vendor
+example_bare/**/build
+example_bare/ios/Pods
+example_bare/android/.gradle
